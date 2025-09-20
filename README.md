@@ -95,10 +95,3 @@ src/
 ## API Integration
 
 The application connects to a backend API for form submissions and data management. Configure the API URL in the `.env` file.
-
-## Recent Updates
-
-- ✅ Migrated from Bootstrap CDN to local installation
-- ✅ Converted user credentials from hardcoded data to environment variables
-- ✅ Added `.env` support with proper Vite configuration
-- ✅ Improved security by removing sensitive data from source code

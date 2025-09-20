@@ -44,9 +44,9 @@ The application uses environment variables for user credentials. All variables m
 
 Example:
 ```env
-VITE_API_BASE_URL=http://192.168.1.177:8008
-VITE_USER_ADMIN_PNS_SEGAF_USERNAME=197301071993031001
-VITE_USER_ADMIN_PNS_SEGAF_PASSWORD=SegafAlgadri151
+VITE_API_BASE_URL=http://127.0.0.1:8008
+VITE_USER_ADMIN_PNS_SEGAF_USERNAME=123
+VITE_USER_ADMIN_PNS_SEGAF_PASSWORD=123
 ```
 
 ### User Structure

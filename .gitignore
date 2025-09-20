@@ -29,3 +29,5 @@ deploy.sh
 *.njsproj
 *.sln
 *.sw?
+deploy.sh
+deploy.sh

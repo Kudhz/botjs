@@ -31,7 +31,6 @@ fi
 lftp -e "
 set ssl:verify-certificate no
 open ftp://${FTP_USER}:${FTP_PASS}@${FTP_HOST}
-cd ${FTP_DIR}
 mirror -R dist/ ./
 quit
 "

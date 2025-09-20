@@ -202,7 +202,7 @@ const App = () => {
 
       {/* Brand Header */}
       <div style={{width: '100%', maxWidth: '1200px'}}>
-        <div className="text-center mb-4">
+        <div className="text-center mb-2">
           <div className="brand-container">
             <div className="main-title">
               <i className="fas fa-robot me-3"></i>Bot Automation
@@ -216,7 +216,7 @@ const App = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="mb-5" style={{width: '100%', maxWidth: '1200px'}}>
+      <nav className="mb-2" style={{width: '100%', maxWidth: '1200px'}}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <ul className="nav nav-pills nav-fill gap-3 flex-row flex-wrap justify-content-center" role="tablist">
             <li className="nav-item" role="presentation">

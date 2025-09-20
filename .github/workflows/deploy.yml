@@ -3,12 +3,14 @@ name: 🚀 Deploy to aaPanel Server
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Remove pull_request deployment for security
+  workflow_dispatch:  # Allow manual deployment
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      build-success: ${{ steps.build.outputs.success }}
     
     steps:
     - name: 📥 Checkout code
@@ -24,10 +26,35 @@ jobs:
       run: npm ci
       
     - name: 🏗️ Build project
-      run: npm run build
+      id: build
+      run: |
+        npm run build
+        echo "success=true" >> $GITHUB_OUTPUT
+        
+    - name: 📦 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: dist/
+        retention-days: 1
       
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ needs.build.outputs.build-success == 'true' }}
+    environment: 
+      name: production
+      
+    steps:
+    - name: 📥 Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-files
+        path: dist/
+        
     - name: 🚀 Prepare deployment directory
-      uses: appleboy/ssh-action@v1.0.0
+      uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
@@ -57,7 +84,7 @@ jobs:
         remote_key: ${{ secrets.SERVER_SSH_KEY }}
         
     - name: 🔧 Set permissions and verify deployment
-      uses: appleboy/ssh-action@v1.0.0
+      uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
@@ -78,4 +105,23 @@ jobs:
           echo "Verifying deployment..."
           ls -la /www/wwwroot/kudh771/
           
+          # Verify index.html exists
+          if [ ! -f "/www/wwwroot/kudh771/index.html" ]; then
+            echo "❌ Deployment verification failed: index.html not found"
+            exit 1
+          fi
+          
           echo "✅ Deployment completed successfully!"
+          
+    - name: 🔍 Health check
+      run: |
+        # Wait a moment for server to refresh
+        sleep 5
+        # You can add a curl health check here if needed
+        echo "Health check completed"
+        
+    - name: 📧 Notify deployment success
+      if: success()
+      run: |
+        echo "🎉 Deployment to production successful!"
+        echo "Site URL: http://${{ secrets.SERVER_HOST }}:19818/kudh771"

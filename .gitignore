@@ -16,8 +16,8 @@ dist-ssr
 .env
 
 # Deployment scripts with sensitive server info
-deploy.sh
 clean-build.sh
+deploy.sh
 
 # Editor directories and files
 .vscode/*

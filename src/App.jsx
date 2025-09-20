@@ -5,6 +5,7 @@ import AjukanComponent from './components/AjukanComponent';
 import PreviewComponent from './components/PreviewComponent';
 import { dataUser, showMessage } from './data/userData';
 import { API_ENDPOINTS } from './config/api';
+import logger from './utils/logger';
 import './styles.css';
 
 const App = () => {
@@ -93,7 +94,7 @@ const App = () => {
         showMessage('Gagal: ' + errorMsg, 'danger', 8000);
       }
     } catch (error) {
-      console.error('Error submitting tambah:', error);
+      logger.error('Error submitting tambah:', error);
       setMessage({ text: 'Gagal mengirim data: ' + error.message, type: 'danger' });
       showMessage('Gagal mengirim data: ' + error.message, 'danger', 8000);
     } finally {
@@ -115,7 +116,7 @@ const App = () => {
       let parsedResult;
       try {
         parsedResult = JSON.parse(result);
-      } catch (e) {
+      } catch {
         parsedResult = result; // Keep as string if not JSON
       }
 
@@ -131,7 +132,7 @@ const App = () => {
             isSuccess = String(parsedResult.status).toLowerCase() === 'success';
           }
         }
-      } catch (e) {
+      } catch {
         isSuccess = false;
       }
 
@@ -147,7 +148,7 @@ const App = () => {
         showMessage(msg, 'danger', 8000);
       }
     } catch (error) {
-      console.error('Error submitting isi:', error);
+      logger.error('Error submitting isi:', error);
       let msg = 'Gagal mengirim data!';
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         msg += ' (network error)';
@@ -186,7 +187,7 @@ const App = () => {
         showMessage('Ajukan gagal: ' + JSON.stringify(result), 'danger', 8000);
       }
     } catch (error) {
-      console.error('Error submitting ajukan:', error);
+      logger.error('Error submitting ajukan:', error);
       const errorMsg = 'Request error: ' + error.message;
       setMessage({ text: errorMsg, type: 'danger' });
       showMessage(errorMsg, 'danger', 8000);

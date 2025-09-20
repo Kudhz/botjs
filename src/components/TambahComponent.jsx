@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import logger from '../utils/logger';
+import { notifyError } from '../utils/notifications';
 
 const TambahComponent = ({ 
   dataUser, 
@@ -7,8 +9,7 @@ const TambahComponent = ({
   isLoading,
   formData,
   setFormData,
-  message,
-  errors 
+  message
 }) => {
   const [bulanOptions, setBulanOptions] = useState([]);
   const [isLoadingBulan, setIsLoadingBulan] = useState(false);
@@ -119,7 +120,7 @@ const TambahComponent = ({
         }
       }
     } catch (error) {
-      console.error('Error fetching mapping:', error);
+      logger.error('Error fetching mapping:', error);
     } finally {
       setIsLoadingBulan(false);
     }
@@ -140,7 +141,7 @@ const TambahComponent = ({
     const { tupoksi, bulan_t, id_skp_t, user_t, csrf_token, allcookies } = formData;
     
     if (!tupoksi || !bulan_t || !id_skp_t) {
-      alert('Pastikan Tupoksi, Bulan, dan ID SKP sudah terisi.');
+      notifyError('Pastikan Tupoksi, Bulan, dan ID SKP sudah terisi.');
       return;
     }
 
@@ -163,7 +164,7 @@ const TambahComponent = ({
         throw new Error('Raw response is null, undefined, or not a string');
       }
 
-      console.log('🔍 Processing raw response with JavaScript...', 'Length:', rawResponse.length);
+      logger.debug('Processing raw response with JavaScript...', 'Length:', rawResponse.length);
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -173,7 +174,7 @@ const TambahComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          console.log('✅ Found indikator data:', indikatorData.length, 'items');
+          logger.success('Found indikator data:', indikatorData.length, 'items');
           
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
@@ -188,9 +189,9 @@ const TambahComponent = ({
           // Hitung jumlah unik
           const uniqueIndikatorKinerja = [...new Set(allIndikatorKinerja)];
           jumlahUnikIndikatorKinerja = uniqueIndikatorKinerja.length;
-          console.log('📊 Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
+          logger.data('Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
         } catch (e) {
-          console.error('❌ Error parsing indikator JSON:', e);
+          logger.error('Error parsing indikator JSON:', e);
         }
       }
 
@@ -200,9 +201,9 @@ const TambahComponent = ({
       if (penilaiaanMatch) {
         try {
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
-          console.log('✅ Found penilaiaan data:', penilaiaanArr.length, 'items');
+          logger.success('Found penilaiaan data:', penilaiaanArr.length, 'items');
         } catch (e) {
-          console.error('❌ Error parsing penilaiaan JSON:', e);
+          logger.error('Error parsing penilaiaan JSON:', e);
         }
       }
 
@@ -213,7 +214,7 @@ const TambahComponent = ({
       if (rhkMatch) {
         try {
           rhkIndikator = JSON.parse(rhkMatch[1]);
-          console.log('✅ Found RHK indikator data:', rhkIndikator.length, 'items');
+          logger.success('Found RHK indikator data:', rhkIndikator.length, 'items');
           if (Array.isArray(rhkIndikator)) {
             rhkIndikator.forEach(item => {
               if (item.id_indikator) {
@@ -222,7 +223,7 @@ const TambahComponent = ({
             });
           }
         } catch (e) {
-          console.error('❌ Error parsing RHK JSON:', e);
+          logger.error('Error parsing RHK JSON:', e);
         }
       }
 
@@ -264,7 +265,7 @@ const TambahComponent = ({
       };
 
     } catch (error) {
-      console.error('❌ JavaScript Processing Error:', error);
+      logger.error('JavaScript Processing Error:', error);
       return { success: false, error: error.message };
     }
   };

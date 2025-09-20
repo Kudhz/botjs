@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import logger from '../utils/logger';
+import { notifyError } from '../utils/notifications';
 
 const AjukanComponent = ({ 
   dataUser, 
@@ -7,8 +9,7 @@ const AjukanComponent = ({
   isLoading,
   formData,
   setFormData,
-  message,
-  errors 
+  message
 }) => {
   const [bulanOptions, setBulanOptions] = useState([]);
   const [isLoadingBulan, setIsLoadingBulan] = useState(false);
@@ -79,13 +80,13 @@ const AjukanComponent = ({
       if (isSuccess) {
         // Process raw response using JavaScript
         if (!res.raw_response) {
-          console.error('❌ [AJUKAN] No raw_response found in API response. Response structure:', res);
+          logger.error('[AJUKAN] No raw_response found in API response. Response structure:', res);
           setBulanOptions([{value: '', label: '❌ Raw response tidak tersedia', disabled: true}]);
           return;
         }
         
         const jsResult = processRawResponseJS(res.raw_response);
-        console.log('Ajukan - JS Processing Result:', jsResult);
+        logger.info('Ajukan - JS Processing Result:', jsResult);
         
         if (jsResult.success) {
           // Use JavaScript processed mappingIdPenilaiaan for dropdown population
@@ -123,7 +124,7 @@ const AjukanComponent = ({
             if (match) {
               try { 
                 csrfVal = decodeURIComponent(match[1]); 
-              } catch(e) { 
+              } catch { 
                 csrfVal = match[1]; 
               }
             }
@@ -135,14 +136,14 @@ const AjukanComponent = ({
             allcookies: cookiesVal
           }));
         } else {
-          console.error('JS processing failed:', jsResult);
+          logger.error('JS processing failed:', jsResult);
           setBulanOptions([{value: '', label: '❌ JavaScript processing gagal', disabled: true}]);
         }
       } else {
         setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
       }
     } catch (error) {
-      console.error('Error fetching mapping:', error);
+      logger.error('Error fetching mapping:', error);
       setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
     } finally {
       setIsLoadingBulan(false);
@@ -164,7 +165,7 @@ const AjukanComponent = ({
     const { bulan_a, id_skp_a, user_a, csrf_token, allcookies } = formData;
     
     if (!bulan_a || !id_skp_a) {
-      alert('Pilih user dan bulan (id_penilaian) terlebih dahulu');
+      notifyError('Pilih user dan bulan (id_penilaian) terlebih dahulu');
       return;
     }
 
@@ -185,11 +186,11 @@ const AjukanComponent = ({
   const processRawResponseJS = (rawResponse) => {
     try {
       if (!rawResponse || typeof rawResponse !== 'string') {
-        console.error('❌ Raw response validation failed:', typeof rawResponse, rawResponse);
+        logger.error('Raw response validation failed:', typeof rawResponse, rawResponse);
         throw new Error('Raw response is null, undefined, or not a string. Type: ' + typeof rawResponse);
       }
       
-      console.log('🔍 Processing raw response with JavaScript...', 'Length:', rawResponse.length);
+      logger.debug('Processing raw response with JavaScript...', 'Length:', rawResponse.length);
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -198,12 +199,12 @@ const AjukanComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          console.log('✅ Found indikator data:', indikatorData.length, 'items');
+          logger.success('Found indikator data:', indikatorData.length, 'items');
         } catch (e) {
-          console.error('❌ Error parsing indikator JSON:', e);
+          logger.error('Error parsing indikator JSON:', e);
         }
       } else {
-        console.warn('⚠️ No penilaiaan_indikator found in response');
+        logger.warn('No penilaiaan_indikator found in response');
       }
 
       // Extract penilaiaan
@@ -212,12 +213,12 @@ const AjukanComponent = ({
       if (penilaiaanMatch) {
         try {
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
-          console.log('✅ Found penilaiaan data:', penilaiaanArr.length, 'items');
+          logger.success('Found penilaiaan data:', penilaiaanArr.length, 'items');
         } catch (e) {
-          console.error('❌ Error parsing penilaiaan JSON:', e);
+          logger.error('Error parsing penilaiaan JSON:', e);
         }
       } else {
-        console.warn('⚠️ No penilaiaan found in response');
+        logger.warn('No penilaiaan found in response');
       }
 
       // Mapping bulan
@@ -245,12 +246,12 @@ const AjukanComponent = ({
         success: true
       };
 
-      console.log('🎉 JavaScript processing completed:', result);
+      logger.success('JavaScript processing completed:', result);
       
       return result;
 
     } catch (error) {
-      console.error('❌ JavaScript Processing Error:', error);
+      logger.error('JavaScript Processing Error:', error);
       return { success: false, error: error.message };
     }
   };

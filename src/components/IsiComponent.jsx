@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
 
 const IsiComponent = ({ 
@@ -7,12 +7,10 @@ const IsiComponent = ({
   isLoading,
   formData,
   setFormData,
-  message,
-  errors 
+  message
 }) => {
   const [bulanOptions, setBulanOptions] = useState([]);
   const [isLoadingBulan, setIsLoadingBulan] = useState(false);
-  const [jsProcessingResult, setJsProcessingResult] = useState(null);
 
   // Handler untuk perubahan Unit
   const handleUnitChange = (e) => {
@@ -86,9 +84,9 @@ const IsiComponent = ({
         if ((!csrfVal || csrfVal === '') && cookiesVal) {
           const match = cookiesVal.match(/XSRF-TOKEN=([^;]+)/i);
           if (match) {
-            try { 
+            try {
               csrfVal = decodeURIComponent(match[1]); 
-            } catch(e) { 
+            } catch { 
               csrfVal = match[1]; 
             }
           }
@@ -145,9 +143,6 @@ const IsiComponent = ({
               bukti_dukung: jsResult.buktiDukung || '',
               rhk: jsResult.renaksiBulanId ? JSON.stringify(jsResult.renaksiBulanId) : ''
             }));
-            
-            // Store JS results untuk digunakan nanti
-            setJsProcessingResult(jsResult);
             
             console.log('✅ Dropdown populated from JavaScript processing');
           } else {

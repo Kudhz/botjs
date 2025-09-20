@@ -26,38 +26,56 @@ jobs:
     - name: 🏗️ Build project
       run: npm run build
       
-    - name: 🚀 Deploy via SSH + rsync
+    - name: 🚀 Prepare deployment directory
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
-        password: ${{ secrets.SERVER_PASSWORD }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          # Create backup
+          set -e  # Exit on error
+          
+          # Create backup if directory exists
           if [ -d "/www/wwwroot/kudh771" ]; then
+            echo "Creating backup..."
             sudo cp -r /www/wwwroot/kudh771 /www/wwwroot/kudh771.backup.$(date +%Y%m%d_%H%M%S)
+            echo "Backup created successfully"
           fi
           
           # Create directory if not exists
           sudo mkdir -p /www/wwwroot/kudh771
+          echo "Deployment directory ready"
           
     - name: 📡 Upload files via rsync
       uses: burnett01/rsync-deployments@7.0.1
       with:
-        switches: -avzr --delete
+        switches: -avzr --delete --progress
         path: dist/
         remote_path: /www/wwwroot/kudh771/
         remote_host: ${{ secrets.SERVER_HOST }}
         remote_user: ${{ secrets.SERVER_USER }}
         remote_key: ${{ secrets.SERVER_SSH_KEY }}
         
-    - name: 🔧 Set permissions
+    - name: 🔧 Set permissions and verify deployment
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
-        password: ${{ secrets.SERVER_PASSWORD }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
+          set -e  # Exit on error
+          
+          echo "Setting correct permissions..."
           sudo chown -R www-data:www-data /www/wwwroot/kudh771
           sudo chmod -R 755 /www/wwwroot/kudh771
-          sudo chmod 644 /www/wwwroot/kudh771/*.html /www/wwwroot/kudh771/*.php
+          
+          # Set specific permissions for web files
+          if [ -f "/www/wwwroot/kudh771/index.html" ]; then
+            sudo chmod 644 /www/wwwroot/kudh771/index.html
+          fi
+          
+          # Verify deployment
+          echo "Verifying deployment..."
+          ls -la /www/wwwroot/kudh771/
+          
+          echo "✅ Deployment completed successfully!"

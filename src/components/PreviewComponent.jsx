@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
 
 const PreviewComponent = ({ 
@@ -213,7 +213,7 @@ const PreviewComponent = ({
           selectedIds = bulanData.ids || [];
           bulanLabel = bulanData.label || 'Unknown';
           console.log('✅ Parsed as JSON:', bulanData);
-        } catch (jsonError) {
+        } catch {
           console.log('⚠️ JSON parsing failed, using fallback');
           selectedIds = [bulanVal];
           bulanLabel = bulanOptions.find(opt => opt.value === bulanVal)?.label || 'Unknown';

@@ -41,7 +41,7 @@ const TambahComponent = ({
   // Handler untuk perubahan User
   const handleUserChange = async (e) => {
     const username = e.target.value;
-    console.log('🔄 [TAMBAH] handleUserChange called with username:', username);
+    
     
     setFormData(prev => ({
       ...prev,
@@ -50,7 +50,7 @@ const TambahComponent = ({
     }));
     
     if (!username) {
-      console.log('⚠️ [TAMBAH] No username provided, clearing options');
+      
       setBulanOptions([]);
       return;
     }
@@ -79,15 +79,7 @@ const TambahComponent = ({
       const res = await response.json();
       
       // 🔍 LOG: Monitor GET_MAPPING API Response
-      console.log('📡 [TAMBAH] GET_MAPPING API Response:', {
-        success: res?.success,
-        status: res?.status,
-        hasRawResponse: !!res?.raw_response,
-        rawResponseLength: res?.raw_response?.length || 0,
-        hasIdSkp: !!res?.id_skp,
-        hasCsrfToken: !!res?.csrf_token,
-        hasAllCookies: !!res?.allCookies
-      });
+     
       
       const isSuccess = res && (res.success === true || res.status?.toLowerCase() === 'success');
       
@@ -108,19 +100,7 @@ const TambahComponent = ({
           console.log('✅ [TAMBAH] Parsing completed, result:', jsResult);
           
           // 📊 LOG: Monitor JavaScript Processing Results
-          console.log('📊 [TAMBAH] JavaScript Processing Results:', {
-            success: jsResult.success,
-            // hasIndikatorData: !!jsResult.indikatorData,
-            // indikatorDataLength: jsResult.indikatorData?.length || 0,
-            // hasPenilaiaanArr: !!jsResult.penilaiaanArr,
-            // penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
-            // hasRhkIndikator: !!jsResult.rhkIndikator,
-            rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
-            jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
-            mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
-            hasMappingIdPenilaiaan1: !!jsResult.mappingIdPenilaiaan1,
-            mappingIdPenilaiaan1Keys: jsResult.mappingIdPenilaiaan1 ? Object.keys(jsResult.mappingIdPenilaiaan1) : []
-          });
+          
           
           if (jsResult.success) {
             // Populate bulan dropdown
@@ -207,14 +187,6 @@ const TambahComponent = ({
       if (!rawResponse || typeof rawResponse !== 'string') {
         throw new Error('Raw response is null, undefined, or not a string');
       }
-
-      // 🔍 LOG: Start raw response processing
-      console.log('🔄 [TAMBAH] Starting raw response processing...', {
-        responseLength: rawResponse.length,
-        firstChars: rawResponse.substring(0, 200)
-      });
-
-      // Processing raw response with JavaScript
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -224,18 +196,6 @@ const TambahComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          
-          // 📊 LOG: Extracted penilaiaan_indikator
-          console.log('✅ [TAMBAH] Extracted penilaiaan_indikator:', {
-            found: true,
-            dataType: Array.isArray(indikatorData) ? 'array' : typeof indikatorData,
-            length: indikatorData?.length || 0,
-            sampleItem: indikatorData?.[0] ? {
-              id: indikatorData[0].id,
-              indikator_kinerja: indikatorData[0].indikator_kinerja?.substring(0, 50) + '...'
-            } : null
-          });
-          
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
           if (Array.isArray(indikatorData)) {

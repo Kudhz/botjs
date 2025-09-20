@@ -105,26 +105,9 @@ const IsiComponent = ({
 
         // Process raw response dengan JavaScript
         if (res.raw_response) {
-        //   console.log('🔍 [ISI] Processing raw response...');
-        //   console.log('📄 [ISI] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
+       
           const jsResult = processRawResponseJS(res.raw_response);
-        //   console.log('✅ [ISI] Parsing completed, result:', jsResult);
-          
-          // 📊 LOG: Monitor JavaScript Processing Results
-          console.log('📊 [ISI] JavaScript Processing Results:', {
-            success: jsResult.success,
-             hasIndikatorData: !!jsResult.indikatorData,
-            // indikatorDataLength: jsResult.indikatorData?.length || 0,
-            // hasPenilaiaanArr: !!jsResult.penilaiaanArr,
-            // penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
-             hasRhkIndikator: !!jsResult.rhkIndikator,
-            // rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
-            jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
-            mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
-            mappingBulanIdKeys: jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId) : [],
-            renaksiBulanIdLength: jsResult.renaksiBulanId?.length || 0,
-            buktiDukung: jsResult.buktiDukung || 'N/A'
-          });
+           console.log('✅ [ISI] Parsing completed, result:', jsResult);
           
           if (jsResult.success) {
             // Populate bulan dropdown dari JavaScript result
@@ -213,13 +196,6 @@ const IsiComponent = ({
         console.error('Raw response validation failed:', typeof rawResponse, rawResponse);
         throw new Error('Raw response is null, undefined, or not a string. Type: ' + typeof rawResponse);
       }
-      
-      // 🔍 LOG: Start raw response processing
-      console.log('🔄 [ISI] Starting raw response processing...', {
-        responseLength: rawResponse.length,
-        firstChars: rawResponse.substring(0, 200)
-      });
-      
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
       let indikatorData = null;

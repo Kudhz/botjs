@@ -16,7 +16,7 @@ dist-ssr
 .env
 
 # Deployment scripts with sensitive server info
-deploy-ftp.sh
+deploy.sh
 clean-build.sh
 
 # Editor directories and files

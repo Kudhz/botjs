@@ -1,32 +1,29 @@
+// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Optimize build output
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false, // Keep console.log in production for monitoring
-        drop_debugger: true,
-      },
-    },
-    // Split chunks for better caching
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          bootstrap: ['bootstrap', '@popperjs/core'],
-        },
-      },
+          bootstrap: ['bootstrap']
+        }
+      }
     },
-    // Chunk size warnings
-    chunkSizeWarningLimit: 600,
-  },
-  // Optimization during development
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'bootstrap'],
-  },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        keep_fnames: true,        // ✅ Keep function names
+        keep_classnames: true     // ✅ Keep class names
+      },
+      mangle: {
+        keep_fnames: true,        // ✅ Keep function names
+        keep_classnames: true     // ✅ Keep class names
+      }
+    }
+  }
 })

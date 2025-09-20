@@ -113,11 +113,11 @@ const IsiComponent = ({
           // 📊 LOG: Monitor JavaScript Processing Results
           console.log('📊 [ISI] JavaScript Processing Results:', {
             success: jsResult.success,
-            // hasIndikatorData: !!jsResult.indikatorData,
+             hasIndikatorData: !!jsResult.indikatorData,
             // indikatorDataLength: jsResult.indikatorData?.length || 0,
             // hasPenilaiaanArr: !!jsResult.penilaiaanArr,
             // penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
-            // hasRhkIndikator: !!jsResult.rhkIndikator,
+             hasRhkIndikator: !!jsResult.rhkIndikator,
             // rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
             jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
             mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
@@ -230,17 +230,7 @@ const IsiComponent = ({
           indikatorData = JSON.parse(indikatorMatch[1]);
           
           // 📊 LOG: Extracted penilaiaan_indikator
-          console.log('✅ [ISI] Extracted penilaiaan_indikator:', {
-            found: true,
-            dataType: Array.isArray(indikatorData) ? 'array' : typeof indikatorData,
-            length: indikatorData?.length || 0,
-            sampleItem: indikatorData?.[0] ? {
-              id: indikatorData[0].id,
-              indikator_kinerja: indikatorData[0].indikator_kinerja?.substring(0, 50) + '...',
-              hasRealisasi: !!indikatorData[0].realisasi,
-              hasRenaksi: !!indikatorData[0].renaksi
-            } : null
-          });
+         
           
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
@@ -257,12 +247,7 @@ const IsiComponent = ({
           jumlahUnikIndikatorKinerja = uniqueIndikatorKinerja.length;
           
           // 📊 LOG: Processed indikator data
-          console.log('📈 [ISI] Processed indikator data:', {
-            totalItems: indikatorData.length,
-            allIdIndikatorCount: allIndikatorKinerja.length,
-            uniqueIdIndikatorCount: jumlahUnikIndikatorKinerja,
-            uniqueIds: uniqueIndikatorKinerja.slice(0, 10) // Show first 10 unique IDs
-          });
+         
         } catch (e) {
           console.error('Error parsing indikator JSON:', e);
         }
@@ -276,16 +261,7 @@ const IsiComponent = ({
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
           
           // 📊 LOG: Extracted penilaiaan
-          console.log('✅ [ISI] Extracted penilaiaan:', {
-            found: true,
-            dataType: Array.isArray(penilaiaanArr) ? 'array' : typeof penilaiaanArr,
-            length: penilaiaanArr?.length || 0,
-            sampleItem: penilaiaanArr?.[0] ? {
-              id: penilaiaanArr[0].id,
-              bulan: penilaiaanArr[0].bulan,
-              status: penilaiaanArr[0].status
-            } : null
-          });
+         
         } catch (e) {
           console.error('Error parsing penilaiaan JSON:', e);
         }
@@ -307,16 +283,7 @@ const IsiComponent = ({
               }
             });
             
-            // 📊 LOG: Extracted rkh_indikator
-            console.log('✅ [ISI] Extracted rkh_indikator:', {
-              found: true,
-              rhkLength: rhkIndikator.length,
-              mappingTupoksiLength: mappingTupoksi.length,
-              sampleRhkItem: rhkIndikator[0] ? {
-                id_indikator: rhkIndikator[0].id_indikator,
-                hasOrder: !!rhkIndikator[0].order
-              } : null
-            });
+           
           }
         } catch (e) {
           console.error('Error parsing RHK JSON:', e);

@@ -8,8 +8,7 @@ import { API_ENDPOINTS } from './config/api';
 import './styles.css';
 
 const App = () => {
-  console.log('🚀 App component loaded and rendered');
-  
+  // State untuk tab aktif dan loading
   const [activeTab, setActiveTab] = useState('tambah');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);

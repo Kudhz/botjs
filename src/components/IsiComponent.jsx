@@ -77,16 +77,6 @@ const IsiComponent = ({
 
       const res = await response.json();
       
-      // 🔍 LOG: Monitor GET_MAPPING API Response
-      console.log('📡 [ISI] GET_MAPPING API Response:', {
-        success: res?.success,
-        status: res?.status,
-        hasRawResponse: !!res?.raw_response,
-        rawResponseLength: res?.raw_response?.length || 0,
-        hasIdSkp: !!res?.id_skp,
-        hasCsrfToken: !!res?.csrf_token,
-        hasAllCookies: !!res?.allCookies
-      });
       
       const isSuccess = res && (res.success === true || res.status?.toLowerCase() === 'success');
       
@@ -115,20 +105,20 @@ const IsiComponent = ({
 
         // Process raw response dengan JavaScript
         if (res.raw_response) {
-          console.log('🔍 [ISI] Processing raw response...');
-          console.log('📄 [ISI] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
+        //   console.log('🔍 [ISI] Processing raw response...');
+        //   console.log('📄 [ISI] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
           const jsResult = processRawResponseJS(res.raw_response);
-          console.log('✅ [ISI] Parsing completed, result:', jsResult);
+        //   console.log('✅ [ISI] Parsing completed, result:', jsResult);
           
           // 📊 LOG: Monitor JavaScript Processing Results
           console.log('📊 [ISI] JavaScript Processing Results:', {
             success: jsResult.success,
-            hasIndikatorData: !!jsResult.indikatorData,
-            indikatorDataLength: jsResult.indikatorData?.length || 0,
-            hasPenilaiaanArr: !!jsResult.penilaiaanArr,
-            penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
-            hasRhkIndikator: !!jsResult.rhkIndikator,
-            rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
+            // hasIndikatorData: !!jsResult.indikatorData,
+            // indikatorDataLength: jsResult.indikatorData?.length || 0,
+            // hasPenilaiaanArr: !!jsResult.penilaiaanArr,
+            // penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
+            // hasRhkIndikator: !!jsResult.rhkIndikator,
+            // rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
             jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
             mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
             mappingBulanIdKeys: jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId) : [],

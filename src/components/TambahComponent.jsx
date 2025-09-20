@@ -102,19 +102,19 @@ const TambahComponent = ({
 
         // Process raw response
         if (res.raw_response) {
-          console.log('🔍 [TAMBAH] Processing raw response...');
-          console.log('📄 [TAMBAH] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
+        //   console.log('🔍 [TAMBAH] Processing raw response...');
+        //   console.log('📄 [TAMBAH] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
           const jsResult = processRawResponseJS(res.raw_response);
           console.log('✅ [TAMBAH] Parsing completed, result:', jsResult);
           
           // 📊 LOG: Monitor JavaScript Processing Results
           console.log('📊 [TAMBAH] JavaScript Processing Results:', {
             success: jsResult.success,
-            hasIndikatorData: !!jsResult.indikatorData,
-            indikatorDataLength: jsResult.indikatorData?.length || 0,
-            hasPenilaiaanArr: !!jsResult.penilaiaanArr,
-            penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
-            hasRhkIndikator: !!jsResult.rhkIndikator,
+            // hasIndikatorData: !!jsResult.indikatorData,
+            // indikatorDataLength: jsResult.indikatorData?.length || 0,
+            // hasPenilaiaanArr: !!jsResult.penilaiaanArr,
+            // penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
+            // hasRhkIndikator: !!jsResult.rhkIndikator,
             rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
             jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
             mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,

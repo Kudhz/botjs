@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
-import logger from '../utils/logger';
 import { notifyError } from '../utils/notifications';
 
 const TambahComponent = ({ 
@@ -42,6 +41,8 @@ const TambahComponent = ({
   // Handler untuk perubahan User
   const handleUserChange = async (e) => {
     const username = e.target.value;
+    console.log('🔄 [TAMBAH] handleUserChange called with username:', username);
+    
     setFormData(prev => ({
       ...prev,
       user_t: username,
@@ -49,6 +50,7 @@ const TambahComponent = ({
     }));
     
     if (!username) {
+      console.log('⚠️ [TAMBAH] No username provided, clearing options');
       setBulanOptions([]);
       return;
     }
@@ -75,6 +77,18 @@ const TambahComponent = ({
       });
 
       const res = await response.json();
+      
+      // 🔍 LOG: Monitor GET_MAPPING API Response
+      console.log('📡 [TAMBAH] GET_MAPPING API Response:', {
+        success: res?.success,
+        status: res?.status,
+        hasRawResponse: !!res?.raw_response,
+        rawResponseLength: res?.raw_response?.length || 0,
+        hasIdSkp: !!res?.id_skp,
+        hasCsrfToken: !!res?.csrf_token,
+        hasAllCookies: !!res?.allCookies
+      });
+      
       const isSuccess = res && (res.success === true || res.status?.toLowerCase() === 'success');
       
       if (isSuccess) {
@@ -88,7 +102,25 @@ const TambahComponent = ({
 
         // Process raw response
         if (res.raw_response) {
+          console.log('🔍 [TAMBAH] Processing raw response...');
+          console.log('📄 [TAMBAH] Raw Response Data:', res.raw_response.substring(0, 500) + '...');
           const jsResult = processRawResponseJS(res.raw_response);
+          console.log('✅ [TAMBAH] Parsing completed, result:', jsResult);
+          
+          // 📊 LOG: Monitor JavaScript Processing Results
+          console.log('📊 [TAMBAH] JavaScript Processing Results:', {
+            success: jsResult.success,
+            hasIndikatorData: !!jsResult.indikatorData,
+            indikatorDataLength: jsResult.indikatorData?.length || 0,
+            hasPenilaiaanArr: !!jsResult.penilaiaanArr,
+            penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
+            hasRhkIndikator: !!jsResult.rhkIndikator,
+            rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
+            jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
+            mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
+            hasMappingIdPenilaiaan1: !!jsResult.mappingIdPenilaiaan1,
+            mappingIdPenilaiaan1Keys: jsResult.mappingIdPenilaiaan1 ? Object.keys(jsResult.mappingIdPenilaiaan1) : []
+          });
           
           if (jsResult.success) {
             // Populate bulan dropdown
@@ -118,21 +150,21 @@ const TambahComponent = ({
             }));
           } else {
             // JS processing failed
-            logger.warn('JavaScript processing failed:', jsResult.error);
+            console.warn('JavaScript processing failed:', jsResult.error);
             setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
           }
         } else {
           // No raw_response
-          logger.warn('No raw_response found in API response');
+          console.warn('No raw_response found in API response');
           setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
         }
       } else {
         // API request failed (sukses = false)
-        logger.warn('API request failed - sukses = false:', res);
+        console.warn('API request failed - sukses = false:', res);
         setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
       }
     } catch (error) {
-      logger.error('Error fetching mapping:', error);
+      console.error('Error fetching mapping:', error);
     } finally {
       setIsLoadingBulan(false);
     }
@@ -176,6 +208,12 @@ const TambahComponent = ({
         throw new Error('Raw response is null, undefined, or not a string');
       }
 
+      // 🔍 LOG: Start raw response processing
+      console.log('🔄 [TAMBAH] Starting raw response processing...', {
+        responseLength: rawResponse.length,
+        firstChars: rawResponse.substring(0, 200)
+      });
+
       // Processing raw response with JavaScript
       
       // Extract penilaiaan_indikator
@@ -186,7 +224,17 @@ const TambahComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          // Found indikator data
+          
+          // 📊 LOG: Extracted penilaiaan_indikator
+          console.log('✅ [TAMBAH] Extracted penilaiaan_indikator:', {
+            found: true,
+            dataType: Array.isArray(indikatorData) ? 'array' : typeof indikatorData,
+            length: indikatorData?.length || 0,
+            sampleItem: indikatorData?.[0] ? {
+              id: indikatorData[0].id,
+              indikator_kinerja: indikatorData[0].indikator_kinerja?.substring(0, 50) + '...'
+            } : null
+          });
           
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
@@ -201,9 +249,9 @@ const TambahComponent = ({
           // Hitung jumlah unik
           const uniqueIndikatorKinerja = [...new Set(allIndikatorKinerja)];
           jumlahUnikIndikatorKinerja = uniqueIndikatorKinerja.length;
-          logger.data('Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
+          console.log('Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
         } catch (e) {
-          logger.error('Error parsing indikator JSON:', e);
+          console.error('Error parsing indikator JSON:', e);
         }
       }
 
@@ -215,7 +263,7 @@ const TambahComponent = ({
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
           // Found penilaiaan data
         } catch (e) {
-          logger.error('Error parsing penilaiaan JSON:', e);
+          console.error('Error parsing penilaiaan JSON:', e);
         }
       }
 
@@ -235,7 +283,7 @@ const TambahComponent = ({
             });
           }
         } catch (e) {
-          logger.error('Error parsing RHK JSON:', e);
+          console.error('Error parsing RHK JSON:', e);
         }
       }
 
@@ -277,7 +325,7 @@ const TambahComponent = ({
       };
 
     } catch (error) {
-      logger.error('JavaScript Processing Error:', error);
+      console.error('JavaScript Processing Error:', error);
       return { success: false, error: error.message };
     }
   };

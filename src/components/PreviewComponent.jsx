@@ -44,6 +44,8 @@ const PreviewComponent = ({
   // Handler untuk perubahan User
   const handleUserChange = async (e) => {
     const username = e.target.value;
+    console.log('🔄 [PREVIEW] handleUserChange called with username:', username);
+    
     setFormData(prev => ({
       ...prev,
       user_p: username,
@@ -82,23 +84,52 @@ const PreviewComponent = ({
       });
 
       const res = await response.json();
+      
+      // 🔍 LOG: Monitor GET_MAPPING API Response
+      console.log('📡 [PREVIEW] GET_MAPPING API Response:', {
+        success: res?.success,
+        status: res?.status,
+        hasRawResponse: !!res?.raw_response,
+        rawResponseLength: res?.raw_response?.length || 0,
+        hasIdSkp: !!res?.id_skp,
+        hasCsrfToken: !!res?.csrf_token,
+        hasAllCookies: !!res?.allCookies
+      });
+      
       const isSuccess = res && (res.success === true || res.status?.toLowerCase() === 'success');
       
       if (isSuccess) {
         // Process raw response using JavaScript
         if (!res.raw_response) {
-          console.error('❌ [PREVIEW] No raw_response found in API response');
+          console.error('[PREVIEW] No raw_response found in API response');
           setBulanOptions([{value: '', label: '❌ Raw response tidak tersedia', disabled: true}]);
           return;
         }
         
+        console.log('🔍 [PREVIEW] Processing raw response...');
         const jsResult = processRawResponseJS(res.raw_response);
-        console.log('Preview - JS Processing Result:', jsResult);
+        
+        // 📊 LOG: Monitor JavaScript Processing Results
+        console.log('📊 [PREVIEW] JavaScript Processing Results:', {
+          success: jsResult.success,
+          hasIndikatorData: !!jsResult.indikatorData,
+          indikatorDataLength: jsResult.indikatorData?.length || 0,
+          hasPenilaiaanArr: !!jsResult.penilaiaanArr,
+          penilaiaanArrLength: jsResult.penilaiaanArr?.length || 0,
+          hasRhkIndikator: !!jsResult.rhkIndikator,
+          rhkIndikatorLength: jsResult.rhkIndikator?.length || 0,
+          jumlahUnikIndikatorKinerja: jsResult.jumlahUnikIndikatorKinerja || 0,
+          mappingTupoksiLength: jsResult.mappingTupoksi?.length || 0,
+          hasMappingBulanId: !!jsResult.mappingBulanId,
+          mappingBulanIdKeys: jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId) : [],
+          renaksiBulanIdLength: jsResult.renaksiBulanId?.length || 0,
+          buktiDukung: jsResult.buktiDukung || 'N/A'
+        });
         
         if (jsResult.success && jsResult.mappingBulanId) {
           // Populate dropdown dengan semua bulan yang tersedia (sudah diisi, belum diisi, dll)
           const options = [];
-          console.log('📅 Available months for preview:', Object.keys(jsResult.mappingBulanId));
+          console.log('📅 [PREVIEW] Available months for preview:', Object.keys(jsResult.mappingBulanId));
           
           const tempBulanData = {};
           for (let bulanLabel in jsResult.mappingBulanId) {
@@ -118,7 +149,7 @@ const PreviewComponent = ({
             const dataKey = 'month_' + Object.keys(tempBulanData).length;
             tempBulanData[dataKey] = bulanData;
             
-            console.log('📝 Adding month option:', bulanLabel, 'with key:', dataKey);
+            console.log('📝 [PREVIEW] Adding month option:', { bulanLabel, dataKey });
             
             options.push({
               value: dataKey,
@@ -135,22 +166,26 @@ const PreviewComponent = ({
           
           setPreviewBulanData(tempBulanData);
         } else {
-          console.error('❌ JS processing failed or no mapping data:', jsResult);
+          console.error('[PREVIEW] JS processing failed or no mapping data:', jsResult);
           setBulanOptions([{value: '', label: '❌ JavaScript processing gagal', disabled: true}]);
         }
         
         // Store JS results untuk digunakan saat preview
         setPreviewJSResult(jsResult);
         
-        // Display hasil di console untuk monitoring preview data
+        // 🎯 LOG: Detailed preview data monitoring
         if (jsResult && jsResult.success) {
-          console.log('=== PREVIEW RENAKSI - DATA SIAP ===');
-          console.log('📊 Summary Data Preview:');
-          console.log('- Jumlah Indikator Kinerja Unik:', jsResult.jumlahUnikIndikatorKinerja || 0);
-          console.log('- Jumlah Mapping Tupoksi:', jsResult.mappingTupoksi ? jsResult.mappingTupoksi.length : 0);
-          console.log('- Jumlah Mapping Bulan:', jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId).length : 0);
-          console.log('- Jumlah Renaksi Data:', jsResult.renaksiBulanId ? jsResult.renaksiBulanId.length : 0);
-          console.log('===== END PREVIEW RENAKSI DATA =====\n');
+          console.log('🎯 [PREVIEW] === RENAKSI DATA SIAP ===');
+          console.log('📊 [PREVIEW] Summary Data Preview:', {
+            jumlahIndikatorKinerjaUnik: jsResult.jumlahUnikIndikatorKinerja || 0,
+            jumlahMappingTupoksi: jsResult.mappingTupoksi ? jsResult.mappingTupoksi.length : 0,
+            jumlahMappingBulan: jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId).length : 0,
+            jumlahRenaksiData: jsResult.renaksiBulanId ? jsResult.renaksiBulanId.length : 0,
+            mappingBulanKeys: jsResult.mappingBulanId ? Object.keys(jsResult.mappingBulanId).slice(0, 5) : [],
+            sampleTupoksi: jsResult.mappingTupoksi ? jsResult.mappingTupoksi.slice(0, 5) : [],
+            sampleRenaksi: jsResult.renaksiBulanId ? jsResult.renaksiBulanId.slice(0, 3) : []
+          });
+          console.log('🎯 [PREVIEW] === END RENAKSI DATA ===');
         }
         
       } else {
@@ -251,22 +286,19 @@ const PreviewComponent = ({
 
   // Function to generate preview content
   const generatePreviewContent = (selectedIds, bulanLabel, jsResult) => {
-    console.log('🎬 Generating preview content for:', bulanLabel, 'IDs:', selectedIds);
-    
-    // Console logging untuk monitor preview generation
-    console.log('=== PREVIEW RENAKSI - GENERATE CONTENT ===');
-    console.log('📅 Bulan yang dipilih:', bulanLabel);
-    console.log('🔢 Jumlah ID yang difilter:', selectedIds.length);
-    console.log('📋 Sample IDs yang akan ditampilkan:', selectedIds.slice(0, 5));
-    if (selectedIds.length > 5) {
-      console.log('   ... dan', selectedIds.length - 5, 'ID lainnya');
-    }
-    console.log('📊 Data tersedia di jsResult:', jsResult ? 'Ya' : 'Tidak');
-    if (jsResult) {
-      console.log('   - Total renaksi data:', jsResult.renaksiBulanId ? jsResult.renaksiBulanId.length : 0);
-      console.log('   - Total mapping tupoksi:', jsResult.mappingTupoksi ? jsResult.mappingTupoksi.length : 0);
-    }
-    console.log('=======================================');
+    // 🔍 LOG: Monitor preview content generation
+    console.log('🎬 [PREVIEW] === GENERATE CONTENT ===');
+    console.log('🎬 [PREVIEW] Generating preview content:', {
+      bulanLabel,
+      selectedIdsLength: selectedIds.length,
+      sampleIds: selectedIds.slice(0, 5),
+      hasMoreIds: selectedIds.length > 5,
+      additionalIds: selectedIds.length > 5 ? selectedIds.length - 5 : 0,
+      hasJsResult: !!jsResult,
+      totalRenaksiData: jsResult?.renaksiBulanId?.length || 0,
+      totalMappingTupoksi: jsResult?.mappingTupoksi?.length || 0
+    });
+    console.log('🎬 [PREVIEW] =======================================');
     
     try {
         // Validate inputs
@@ -363,7 +395,11 @@ const PreviewComponent = ({
         throw new Error('Raw response is null, undefined, or not a string');
       }
 
-      console.log('🔍 Processing raw response with JavaScript...', 'Length:', rawResponse.length);
+      // 🔍 LOG: Start raw response processing
+      console.log('� [PREVIEW] Starting raw response processing...', {
+        responseLength: rawResponse.length,
+        firstChars: rawResponse.substring(0, 200)
+      });
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);

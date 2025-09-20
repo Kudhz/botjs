@@ -5,10 +5,11 @@ import AjukanComponent from './components/AjukanComponent';
 import PreviewComponent from './components/PreviewComponent';
 import { dataUser, showMessage } from './data/userData';
 import { API_ENDPOINTS } from './config/api';
-import logger from './utils/logger';
 import './styles.css';
 
 const App = () => {
+  console.log('🚀 App component loaded and rendered');
+  
   const [activeTab, setActiveTab] = useState('tambah');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -61,6 +62,7 @@ const App = () => {
 
   // Handler untuk mengubah tab aktif
   const handleTabChange = (tab) => {
+    console.log('📋 Tab changed to:', tab);
     setActiveTab(tab);
     setMessage(null); // Clear message saat berganti tab
   };
@@ -94,7 +96,7 @@ const App = () => {
         showMessage('Gagal: ' + errorMsg, 'danger', 8000);
       }
     } catch (error) {
-      logger.error('Error submitting tambah:', error);
+      console.error('Error submitting tambah:', error);
       setMessage({ text: 'Gagal mengirim data: ' + error.message, type: 'danger' });
       showMessage('Gagal mengirim data: ' + error.message, 'danger', 8000);
     } finally {
@@ -148,7 +150,7 @@ const App = () => {
         showMessage(msg, 'danger', 8000);
       }
     } catch (error) {
-      logger.error('Error submitting isi:', error);
+      console.error('Error submitting isi:', error);
       let msg = 'Gagal mengirim data!';
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         msg += ' (network error)';
@@ -187,7 +189,7 @@ const App = () => {
         showMessage('Ajukan gagal: ' + JSON.stringify(result), 'danger', 8000);
       }
     } catch (error) {
-      logger.error('Error submitting ajukan:', error);
+      console.error('Error submitting ajukan:', error);
       const errorMsg = 'Request error: ' + error.message;
       setMessage({ text: errorMsg, type: 'danger' });
       showMessage(errorMsg, 'danger', 8000);

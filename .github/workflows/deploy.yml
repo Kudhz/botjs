@@ -1,0 +1,63 @@
+name: 🚀 Deploy to aaPanel Server
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 📚 Install dependencies
+      run: npm ci
+      
+    - name: 🏗️ Build project
+      run: npm run build
+      
+    - name: 🚀 Deploy via SSH + rsync
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          # Create backup
+          if [ -d "/www/wwwroot/kudh771" ]; then
+            sudo cp -r /www/wwwroot/kudh771 /www/wwwroot/kudh771.backup.$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Create directory if not exists
+          sudo mkdir -p /www/wwwroot/kudh771
+          
+    - name: 📡 Upload files via rsync
+      uses: burnett01/rsync-deployments@7.0.1
+      with:
+        switches: -avzr --delete
+        path: dist/
+        remote_path: /www/wwwroot/kudh771/
+        remote_host: ${{ secrets.SERVER_HOST }}
+        remote_user: ${{ secrets.SERVER_USER }}
+        remote_key: ${{ secrets.SERVER_SSH_KEY }}
+        
+    - name: 🔧 Set permissions
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          sudo chown -R www-data:www-data /www/wwwroot/kudh771
+          sudo chmod -R 755 /www/wwwroot/kudh771
+          sudo chmod 644 /www/wwwroot/kudh771/*.html /www/wwwroot/kudh771/*.php

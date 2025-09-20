@@ -15,6 +15,10 @@ dist-ssr
 # Environment variables
 .env
 
+# Deployment scripts with sensitive server info
+deploy-ftp.sh
+clean-build.sh
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

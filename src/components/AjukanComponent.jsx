@@ -81,12 +81,12 @@ const AjukanComponent = ({
         // Process raw response using JavaScript
         if (!res.raw_response) {
           logger.error('[AJUKAN] No raw_response found in API response. Response structure:', res);
-          setBulanOptions([{value: '', label: '❌ Raw response tidak tersedia', disabled: true}]);
+          setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
           return;
         }
         
         const jsResult = processRawResponseJS(res.raw_response);
-        logger.info('Ajukan - JS Processing Result:', jsResult);
+        // JS Processing completed
         
         if (jsResult.success) {
           // Use JavaScript processed mappingIdPenilaiaan for dropdown population
@@ -137,14 +137,16 @@ const AjukanComponent = ({
           }));
         } else {
           logger.error('JS processing failed:', jsResult);
-          setBulanOptions([{value: '', label: '❌ JavaScript processing gagal', disabled: true}]);
+          setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
         }
       } else {
-        setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
+        // API request failed (sukses = false)
+        logger.warn('API request failed - sukses = false:', res);
+        setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
       }
     } catch (error) {
       logger.error('Error fetching mapping:', error);
-      setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
+      setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
     } finally {
       setIsLoadingBulan(false);
     }
@@ -190,7 +192,7 @@ const AjukanComponent = ({
         throw new Error('Raw response is null, undefined, or not a string. Type: ' + typeof rawResponse);
       }
       
-      logger.debug('Processing raw response with JavaScript...', 'Length:', rawResponse.length);
+      // Processing raw response with JavaScript
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -199,7 +201,7 @@ const AjukanComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          logger.success('Found indikator data:', indikatorData.length, 'items');
+          // Found indikator data
         } catch (e) {
           logger.error('Error parsing indikator JSON:', e);
         }
@@ -213,7 +215,7 @@ const AjukanComponent = ({
       if (penilaiaanMatch) {
         try {
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
-          logger.success('Found penilaiaan data:', penilaiaanArr.length, 'items');
+          // Found penilaiaan data
         } catch (e) {
           logger.error('Error parsing penilaiaan JSON:', e);
         }
@@ -246,7 +248,7 @@ const AjukanComponent = ({
         success: true
       };
 
-      logger.success('JavaScript processing completed:', result);
+      // JavaScript processing completed
       
       return result;
 

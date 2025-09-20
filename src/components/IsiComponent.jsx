@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import logger from '../utils/logger';
 
 const IsiComponent = ({ 
   dataUser, 
@@ -100,13 +101,9 @@ const IsiComponent = ({
 
         // Process raw response dengan JavaScript
         if (res.raw_response) {
-          console.log('🚀 Processing raw response with JavaScript...');
-          
           const jsResult = processRawResponseJS(res.raw_response);
           
           if (jsResult.success) {
-            console.log('✅ JavaScript processing berhasil!');
-            
             // Populate bulan dropdown dari JavaScript result
             const options = [];
             if (jsResult.mappingBulanId) {
@@ -144,21 +141,18 @@ const IsiComponent = ({
               rhk: jsResult.renaksiBulanId ? JSON.stringify(jsResult.renaksiBulanId) : ''
             }));
             
-            console.log('✅ Dropdown populated from JavaScript processing');
           } else {
-            console.error('JavaScript processing gagal:', jsResult.error);
-            setBulanOptions([{value: '', label: '❌ JavaScript processing gagal', disabled: true}]);
+            setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
           }
         } else {
-          console.warn('⚠️ No raw_response found in API response');
-          setBulanOptions([{value: '', label: '❌ No raw response', disabled: true}]);
+          setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
         }
       } else {
-        setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
+        setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
       }
     } catch (error) {
-      console.error('Error fetching mapping:', error);
-      setBulanOptions([{value: '', label: '❌ Gagal ambil data', disabled: true}]);
+      logger.error('Error fetching mapping:', error);
+      setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
     } finally {
       setIsLoadingBulan(false);
     }
@@ -193,11 +187,9 @@ const IsiComponent = ({
     try {
       // Validasi input
       if (!rawResponse || typeof rawResponse !== 'string') {
-        console.error('❌ Raw response validation failed:', typeof rawResponse, rawResponse);
+        logger.error('Raw response validation failed:', typeof rawResponse, rawResponse);
         throw new Error('Raw response is null, undefined, or not a string. Type: ' + typeof rawResponse);
       }
-      
-      console.log('🔍 Processing raw response with JavaScript...', 'Length:', rawResponse.length);
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -207,7 +199,7 @@ const IsiComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          console.log('✅ Found indikator data:', indikatorData.length, 'items');
+
           
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
@@ -222,12 +214,10 @@ const IsiComponent = ({
           // Hitung jumlah unik
           const uniqueIndikatorKinerja = [...new Set(allIndikatorKinerja)];
           jumlahUnikIndikatorKinerja = uniqueIndikatorKinerja.length;
-          console.log('📊 Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
+          logger.data('Unique indikator kinerja:', jumlahUnikIndikatorKinerja);
         } catch (e) {
-          console.error('❌ Error parsing indikator JSON:', e);
+          logger.error('Error parsing indikator JSON:', e);
         }
-      } else {
-        console.warn('⚠️ No penilaiaan_indikator found in response');
       }
 
       // Extract penilaiaan
@@ -236,12 +226,9 @@ const IsiComponent = ({
       if (penilaiaanMatch) {
         try {
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
-          console.log('✅ Found penilaiaan data:', penilaiaanArr.length, 'items');
         } catch (e) {
-          console.error('❌ Error parsing penilaiaan JSON:', e);
+          logger.error('Error parsing penilaiaan JSON:', e);
         }
-      } else {
-        console.warn('⚠️ No penilaiaan found in response');
       }
 
       // Extract rkh_indikator
@@ -251,7 +238,6 @@ const IsiComponent = ({
       if (rhkMatch) {
         try {
           rhkIndikator = JSON.parse(rhkMatch[1]);
-          console.log('✅ Found RHK indikator data:', rhkIndikator.length, 'items');
           if (Array.isArray(rhkIndikator)) {
             rhkIndikator.forEach(item => {
               if (item.id_indikator) {
@@ -260,10 +246,10 @@ const IsiComponent = ({
             });
           }
         } catch (e) {
-          console.error('❌ Error parsing RHK JSON:', e);
+          logger.error('Error parsing RHK JSON:', e);
         }
       } else {
-        console.warn('⚠️ No rkh_indikator found in response');
+        // No rkh_indikator found in response
       }
 
       // Mapping bulan
@@ -363,10 +349,7 @@ const IsiComponent = ({
           }
         });
         
-        console.log('🔍 RENAKSI ORDER DEBUG:');
-        console.log('- mappingTupoksi:', mappingTupoksi);
-        console.log('- renaksiOrderMap:', renaksiOrderMap);
-        console.log('- renaksiBulanId final:', renaksiBulanId);
+        // Debug: Renaksi order processing completed
       }
 
       // Get bukti_dukung
@@ -393,12 +376,12 @@ const IsiComponent = ({
         success: true
       };
 
-      console.log('🎉 JavaScript processing completed:', result);
+      // JavaScript processing completed
       
       return result;
 
     } catch (error) {
-      console.error('❌ JavaScript Processing Error:', error);
+      logger.error('JavaScript Processing Error:', error);
       return { success: false, error: error.message };
     }
   };

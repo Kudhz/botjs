@@ -116,8 +116,20 @@ const TambahComponent = ({
               ...prev,
               tupoksi: JSON.stringify(jsResult.mappingTupoksi || [])
             }));
+          } else {
+            // JS processing failed
+            logger.warn('JavaScript processing failed:', jsResult.error);
+            setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
           }
+        } else {
+          // No raw_response
+          logger.warn('No raw_response found in API response');
+          setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
         }
+      } else {
+        // API request failed (sukses = false)
+        logger.warn('API request failed - sukses = false:', res);
+        setBulanOptions([{value: '', label: '❌ Gagal ambil data bulan', disabled: true}]);
       }
     } catch (error) {
       logger.error('Error fetching mapping:', error);
@@ -164,7 +176,7 @@ const TambahComponent = ({
         throw new Error('Raw response is null, undefined, or not a string');
       }
 
-      logger.debug('Processing raw response with JavaScript...', 'Length:', rawResponse.length);
+      // Processing raw response with JavaScript
       
       // Extract penilaiaan_indikator
       const indikatorMatch = rawResponse.match(/var\s+penilaiaan_indikator\s*=\s*(\[[\s\S]*?\]);/i);
@@ -174,7 +186,7 @@ const TambahComponent = ({
       if (indikatorMatch) {
         try {
           indikatorData = JSON.parse(indikatorMatch[1]);
-          logger.success('Found indikator data:', indikatorData.length, 'items');
+          // Found indikator data
           
           // Ambil semua id_indikator
           const allIndikatorKinerja = [];
@@ -201,7 +213,7 @@ const TambahComponent = ({
       if (penilaiaanMatch) {
         try {
           penilaiaanArr = JSON.parse(penilaiaanMatch[1]);
-          logger.success('Found penilaiaan data:', penilaiaanArr.length, 'items');
+          // Found penilaiaan data
         } catch (e) {
           logger.error('Error parsing penilaiaan JSON:', e);
         }
@@ -214,7 +226,7 @@ const TambahComponent = ({
       if (rhkMatch) {
         try {
           rhkIndikator = JSON.parse(rhkMatch[1]);
-          logger.success('Found RHK indikator data:', rhkIndikator.length, 'items');
+          // Found RHK indikator data
           if (Array.isArray(rhkIndikator)) {
             rhkIndikator.forEach(item => {
               if (item.id_indikator) {

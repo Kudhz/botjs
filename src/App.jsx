@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoginComponent from './components/LoginComponent';
 import TambahComponent from './components/TambahComponent';
 import IsiComponent from './components/IsiComponent';
 import AjukanComponent from './components/AjukanComponent';
@@ -8,6 +9,11 @@ import { API_ENDPOINTS } from './config/api';
 import './styles.css';
 
 const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Session configuration (dalam menit)
+ 
   // State untuk tab aktif dan loading
   const [activeTab, setActiveTab] = useState('tambah');
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +67,7 @@ const App = () => {
 
   // Handler untuk mengubah tab aktif
   const handleTabChange = (tab) => {
-    console.log('📋 Tab changed to:', tab);
+    // console.log('📋 Tab changed to:', tab);
     setActiveTab(tab);
     setMessage(null); // Clear message saat berganti tab
   };
@@ -197,8 +203,96 @@ const App = () => {
     }
   };
 
+   const SESSION_DURATION = 120; // 2 jam = 120 menit
+
+  // Check existing session saat app load
+  useEffect(() => {
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = () => {
+    try {
+      const loginTime = localStorage.getItem('bot_login_time');
+      const sessionDuration = localStorage.getItem('bot_session_duration');
+      
+      if (loginTime && sessionDuration) {
+        const currentTime = new Date().getTime();
+        const loginTimestamp = parseInt(loginTime);
+        const duration = parseInt(sessionDuration) * 60 * 1000; // convert to milliseconds
+        
+        // Check if session is still valid
+        if (currentTime - loginTimestamp < duration) {
+          console.log('✅ Valid session found, auto login');
+          setIsAuthenticated(true);
+        } else {
+          console.log('⏰ Session expired, clearing storage');
+          clearSession();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking session:', error);
+      clearSession();
+    }
+    
+    setIsCheckingAuth(false);
+  };
+
+  const handleLogin = () => {
+    try {
+      const loginTime = new Date().getTime();
+      
+      // Save session data to localStorage
+      localStorage.setItem('bot_login_time', loginTime.toString());
+      localStorage.setItem('bot_session_duration', SESSION_DURATION.toString());
+      localStorage.setItem('bot_authenticated', 'true');
+      
+      console.log('🔐 Session created:', {
+        loginTime: new Date(loginTime).toLocaleString(),
+        duration: SESSION_DURATION + ' minutes',
+        expiresAt: new Date(loginTime + (SESSION_DURATION * 60 * 1000)).toLocaleString()
+      });
+      
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    clearSession();
+    setIsAuthenticated(false);
+    console.log('🔐 User logged out');
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem('bot_login_time');
+    localStorage.removeItem('bot_session_duration');
+    localStorage.removeItem('bot_authenticated');
+  };
+
+  // Show loading screen while checking session
+  if (isCheckingAuth) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{minHeight: '100vh', background: '#1a1a1a'}}>
+        <div className="text-center" style={{color: '#90EE90'}}>
+          <div className="spinner-border mb-3" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p>Memeriksa sesi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return <LoginComponent onLogin={handleLogin} />;
+  }
+
+
   return (
     <div className="app-container">
+
       {/* Fixed message container */}
       <div className="message-container" id="message-container"></div>
 
@@ -327,6 +421,24 @@ const App = () => {
         </div>
       </div>
 
+       <div className="d-flex">
+            <button 
+              className="btn btn-outline-light btn-sm me-2"
+              onClick={() => {
+                const remaining = getRemainingTime();
+                alert(`Sesi berakhir dalam: ${remaining}`);
+              }}
+            >
+              <i className="fas fa-clock"></i> Sesi
+            </button>
+            <button 
+              className="btn btn-outline-danger btn-sm"
+              onClick={handleLogout}
+            >
+              <i className="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+
       {/* Footer */}
       <footer style={{width: '100%', maxWidth: '1200px', marginTop: '3rem', padding: '2rem 0'}}>
         <div className="text-center">
@@ -344,6 +456,30 @@ const App = () => {
       </footer>
     </div>
   );
-}
+
+  // Helper function to get remaining time
+  function getRemainingTime() {
+    try {
+      const loginTime = localStorage.getItem('bot_login_time');
+      const sessionDuration = localStorage.getItem('bot_session_duration');
+      
+      if (loginTime && sessionDuration) {
+        const currentTime = new Date().getTime();
+        const loginTimestamp = parseInt(loginTime);
+        const duration = parseInt(sessionDuration) * 60 * 1000;
+        const remainingMs = (loginTimestamp + duration) - currentTime;
+        
+        if (remainingMs > 0) {
+          const remainingMinutes = Math.floor(remainingMs / 60000);
+          const remainingSeconds = Math.floor((remainingMs % 60000) / 1000);
+          return `${remainingMinutes}m ${remainingSeconds}s`;
+        }
+      }
+      return 'Expired';
+    } catch (error) {
+      return 'Error';
+    }
+  }
+};
 
 export default App;

@@ -1,4 +1,6 @@
+
 {
+  "$schema": "https://json.schemastore.org/package",
   "name": "botjs",
   "private": true,
   "version": "0.0.0",

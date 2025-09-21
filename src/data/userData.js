@@ -3,10 +3,6 @@ const buildUserData = () => {
   return {
     "ADMIN": {
       "PNS": {
-        "Segaf": {
-          username: import.meta.env.VITE_USER_ADMIN_PNS_SEGAF_USERNAME,
-          password: import.meta.env.VITE_USER_ADMIN_PNS_SEGAF_PASSWORD
-        },
         "Edy": {
           username: import.meta.env.VITE_USER_ADMIN_PNS_EDY_USERNAME,
           password: import.meta.env.VITE_USER_ADMIN_PNS_EDY_PASSWORD
